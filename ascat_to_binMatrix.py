@@ -1,3 +1,5 @@
+# ascat to bin matrix python script
+
 import sys
 
 def make_bin(filename):
@@ -22,7 +24,11 @@ def overlap_section(a, b):
     """
     return the overlap section of a and b
     """
-    return max(a[0], b[0]) < min(a[1], b[1])
+    left, right = max(a[0], b[0]), min(a[1], b[1])
+    if left < right:
+        return [left, right]
+    else:
+        return False
 
 def in_section(a,b):
     """
@@ -47,14 +53,38 @@ def readascat(filename):
         if sample not in d:
             d[sample] = []
         #print [sample, chromosome, start, end, cn]
-        d[sample].append([chromosome, start, end,cn])
+        d[sample].append([chromosome, start, end, cn])
 
     return d
 
 def machine(filename):
-    data = readascat(filename)
-    for key, value in data.items():
-        print key, value
+    ascat = readascat(filename)
+    bins = make_bin('chr')
+    for sample, segments in ascat.items():
+        #print sample
+        for win in bins:
+            contain = []
+            relcn = 0    # copy number * base length, normal should be 2*1000000
+            win_chr, win_start, win_end = win
+            for seg in segments:
+                seg_chr, seg_start, seg_end, seg_cn = seg
+                if win_chr != seg_chr:
+                    continue
+                overlap = overlap_section([win_start, win_end], [seg_start, seg_end])
+                if overlap:
+                    ratio = (overlap[1] - overlap[0])/(1000000 - 1.0)
+                    relcn += ratio*seg_cn
+                    contain.append(overlap + [ratio, seg_cn])
+                    #print win, seg, overlap
+            if not contain:
+                relcn = 2
+            else:
+                ratio_left = 1 - sum([i[2] for i in contain])
+                relcn += ratio_left*2
+
+            #print sample, win, contain, relcn
+            print sample, win, relcn
+
 
 def main():
     f = sys.argv[1]
