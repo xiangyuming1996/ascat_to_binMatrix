@@ -64,7 +64,6 @@ def machine(filename):
         #print sample
         for win in bins:
             contain = []
-            relcn = 0    # copy number * base length, normal should be 2*1000000
             win_chr, win_start, win_end = win
             for seg in segments:
                 seg_chr, seg_start, seg_end, seg_cn = seg
@@ -74,16 +73,17 @@ def machine(filename):
                 if overlap:
                     ratio = (overlap[1] - overlap[0])/(1000000 - 1.0)
                     relcn += ratio*seg_cn
-                    contain.append(overlap + [ratio, seg_cn])
+                    contain.append([ratio, seg_cn])
                     #print win, seg, overlap
             if not contain:
                 relcn = 2
             else:
-                ratio_left = 1 - sum([i[2] for i in contain])
-                relcn += ratio_left*2
+                contain.append([1 - sum([i[0] for i in contain]), 2])
+                primary_seg = sorted(contain, key=lambda x:x[0], reverse=True)
+                relcn = primary_seg[0][1]
 
             #print sample, win, contain, relcn
-            print sample, win, relcn
+            print sample, win, contain, relcn
 
 
 def main():
