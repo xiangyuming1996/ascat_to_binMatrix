@@ -1,10 +1,12 @@
 # ascat to bin matrix python script
 
 import sys
+import pandas as pd
 
-def make_bin(filename):
+def make_bins(filename):
     """
     return all genomic bins
+    as list of [chromosome, start, end]
     """
     res = []
     for line in open(filename):
@@ -23,6 +25,7 @@ def make_bin(filename):
 def overlap_section(a, b):
     """
     return the overlap section of a and b
+    return False if a, b is not overlapped
     """
     left, right = max(a[0], b[0]), min(a[1], b[1])
     if left < right:
@@ -32,13 +35,14 @@ def overlap_section(a, b):
 
 def in_section(a,b):
     """
-    return True if section a in section b
+    return True if section a is in section b
     """
     return a[0] > b[0] and a[1] < b[1]
 
 def readascat(filename):
     """read ASCAT format file
-    return a dictionary with sample name as key
+    return a dictionary with sample name as key,
+    list of [chromosome, start, end, copynumber] as value
     24 for chromosome x
     25 for y
     """
@@ -57,11 +61,15 @@ def readascat(filename):
 
     return d
 
-def machine(filename):
-    ascat = readascat(filename)
-    bins = make_bin('chr')
+def align_ascat_to_bins(ascat, bins):
+    """
+    read each sample's segment data, align and call real copy number for
+    each bins
+    """
+    res = {}
     for sample, segments in ascat.items():
         #print sample
+        res[sample] = []
         for win in bins:
             contain = []
             win_chr, win_start, win_end = win
@@ -81,14 +89,29 @@ def machine(filename):
                 contain.append([1 - sum([i[0] for i in contain]), 2])
                 primary_seg = sorted(contain, key=lambda x:x[0], reverse=True)
                 relcn = primary_seg[0][1]
-
+            res[sample].append(relcn)
             #print sample, win, contain, relcn
-            print sample, win, contain, relcn
+            #print sample, win, contain, relcn
+    return res
 
+def to_file(filename):
+    ascat = readascat(filename)
+    bins = make_bins('chr')
+
+    res = align_ascat_to_bins(ascat, bins)
+    index = pd.Index(['.'.join([str(i) for i in b]) for b in bins])
+    df = pd.DataFrame(res, index=index).T
+    columns = df.columns
+    col = pd.Index(columns, name='sample')
+    df.columns = col
+    df.to_csv('test', sep='\t', header=True, index=True)
+    print df
+    print 'done'
+    return 0
 
 def main():
     f = sys.argv[1]
-    machine(f)
+    to_file(f)
 
 if __name__ == "__main__":
     main()
