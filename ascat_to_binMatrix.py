@@ -63,6 +63,7 @@ def readascat(filename):
 
 def align_ascat_to_bins(ascat, bins):
     """
+    heavy lift jobs code
     read each sample's segment data, align and call real copy number for
     each bins
     """
@@ -94,24 +95,38 @@ def align_ascat_to_bins(ascat, bins):
             #print sample, win, contain, relcn
     return res
 
-def to_file(filename):
+def machine(filename):
     ascat = readascat(filename)
     bins = make_bins('chr')
 
     res = align_ascat_to_bins(ascat, bins)
-    index = pd.Index(['.'.join([str(i) for i in b]) for b in bins])
-    df = pd.DataFrame(res, index=index).T
-    columns = df.columns
-    col = pd.Index(columns, name='sample')
+    loc_index = pd.Index(['.'.join([str(i) for i in b]) for b in bins])
+    df = pd.DataFrame(res, index=loc_index).T
+
+    col = pd.Index(df.columns, name='sample')
     df.columns = col
-    df.to_csv('test', sep='\t', header=True, index=True)
+    outfilename = filename + '.binMat.txt'
+
+    df.to_csv(outfilename, sep='\t', header=True, index=True)
     print df
+    print 'file saved as', outfilename
     print 'done'
     return 0
 
+def usage():
+    print '\nUsage:'
+    print '\tpython ascat_to_binMatrix.py file_of_ascat_cnv_segment.txt'
+    print '\noutput will write to file'
+    return 0
+
 def main():
-    f = sys.argv[1]
-    to_file(f)
+    if len(sys.argv) == 1:
+        usage()
+    elif sys.argv[-1] == '-h':
+        usage()
+    else:
+        f = sys.argv[1]
+        machine(f)
 
 if __name__ == "__main__":
     main()
