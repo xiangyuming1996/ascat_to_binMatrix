@@ -85,7 +85,7 @@ def readascat(filename):
 
     print()
     print('read ascat file successfully!')
-    print('samples count: %s, %s' % (len(d), ' '.join(d.keys())))
+    print('samples count: %s\nsamples: %s' % (len(d), ' '.join(d.keys())))
     print('segment count: %s' % segcount)
     print()
 
@@ -102,9 +102,10 @@ def align_ascat_to_bins(ascat, bins):
     print('start align segments in ascat to each window(bin)')
     print('%s bins in total' % len(bins))
     print('%s samples in total' % len(ascat))
+    print('samples: ', end = '')
 
     for sample, segments in ascat.items():
-        print(sample)
+        print(sample, end = ' ')
         res[sample] = []
         for win in bins:
 
@@ -142,6 +143,32 @@ def align_ascat_to_bins(ascat, bins):
             #print sample, win, contain, relcn
     return res
 
+
+def relcn2gainloss(df):
+    """
+    real copy number matrix to gain and loss
+    """
+    df[df > 2] = 100
+    df[df < 2] = -100
+    df[df == 2] = 0
+
+    df = df.astype(str)
+
+    df[df == '100'] = 'gain'
+    df[df == '-100'] = 'loss'
+    df[df == '0'] = ''
+
+    return df
+
+def sortdf(df):
+    """
+    sort dataframe by gain and loss freq
+    """
+    col = df.columns
+    df['lesion'] = df.apply(lambda x:len([i for i in x if i != 2]), axis=1)
+    df.sort_values('lesion', axis=0, inplace=True, ascending=False)
+    return df.reindex(columns = col)
+
 def machine(filename):
 
     ascat = readascat(filename)
@@ -151,14 +178,25 @@ def machine(filename):
     loc_index = pd.Index(['.'.join([str(i) for i in b]) for b in bins])
     df = pd.DataFrame(res, index=loc_index).T
 
-    #col = pd.Index(df.columns, name='sample')
     df.index.name = 'sample'
-    outfilename = filename + '.binMat.txt'
 
+    # relcn real copy nmber
+    outfilename = filename + '.relcn.binMat.txt'
+
+    df = sortdf(df)
     df.to_csv(outfilename, sep='\t', header=True, index=True)
+    print('\n')
     print(df)
-    print('file saved as', outfilename)
-    print()
+    print('file saved in: "%s"\n' % outfilename)
+
+    # gl_df, gain loss df
+    gl_df = relcn2gainloss(df)
+    gl_f = filename + '.gainloss.binMat.txt'
+    gl_df.to_csv(gl_f, sep='\t')
+    print('\n')
+    print(gl_df)
+    print('gain and loss matrix table saved in: "%s"\n' % gl_f)
+    sortdf(gl_df)
 
     make_chr_colorband(bins)
     make_chr_nameprobe(bins)
