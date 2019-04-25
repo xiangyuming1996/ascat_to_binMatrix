@@ -1,4 +1,5 @@
 # ascat to bin matrix python script
+# for CNV heatmap
 
 import sys
 import pandas as pd
@@ -6,12 +7,16 @@ import pandas as pd
 def make_bins(filename):
     """
     return all genomic bins
-    as list of [chromosome, start, end]
+    as list of [[chr, start, end],...]
     """
     res = []
     for line in open(filename):
         chromosome, length = line.strip('\n').split('\t')[:2]
         chromosome, length = map(int, [chromosome, length])
+
+        # only autosome, chr1-22
+        if chromosome >= 23:
+            continue
 
         start = 1
         while start + 1000000 < length:
@@ -20,6 +25,7 @@ def make_bins(filename):
             start += 1000000
         res.append([chromosome, start, length])
 
+    print('make bins succed, in total: %s\n' % len(res))
     return res
 
 def overlap_section(a, b):
@@ -47,17 +53,29 @@ def readascat(filename):
     25 for y
     """
     d = {}
-
+    segcount = 0
     for line in open(filename):
         l = line.strip('\n').split('\t')
         [sample, chromosome, start, end, nMajor, nMinor] = map(lambda x: int(x) if x.isdigit() else x, l)
+
+        # skip table head
         if sample == 'sample':
             continue
+
+        # only autosome
+        if not chromosome <= 22:
+            continue
+
+        # nMinor should always be 0
         cn = sum([nMajor, nMinor])
+
         if sample not in d:
             d[sample] = []
         #print [sample, chromosome, start, end, cn]
         d[sample].append([chromosome, start, end, cn])
+        segcount += 1
+
+    print('read ascat file succed\nsamples count: %s\nsegment count: %s\n' % (len(d), segcount))
 
     return d
 
@@ -68,8 +86,13 @@ def align_ascat_to_bins(ascat, bins):
     each bins
     """
     res = {}
+
+    print('start align segments in ascat to each window(bin)')
+    print('%s bins in total' % len(bins))
+    print('%s samples in total' % len(ascat))
+
     for sample, segments in ascat.items():
-        #print sample
+        print(sample)
         res[sample] = []
         for win in bins:
             contain = []
