@@ -27,23 +27,20 @@ chromosome.ha = HeatmapAnnotation(df = chromosome.anno_df,
     col = list(chromosome = c("odd"="black","even"="gray80")),
     show_legend = FALSE, gap = unit(2,'mm'), link = chromosome.name.link)
 
-#sample.anno_df = data.frame(group = c(rep('N_tumor', 24),rep('N_normal', 24),rep('R_tumor', 24), rep('R_normal', 24)))
-#sample.ha = rowAnnotation(df = sample.anno_df,
-#                          col = list(group = c('N_tumor' = 'darkorchid1',
-#                                               'N_normal' = 'yellow',
-#                                               'R_tumor' = 'chocolate',
-#                                               'R_normal' = 'chartreuse')),
-#                          gp = gpar(col = 'black'),  # for the color of grid border.
-#                          show_legend = TRUE
-#)
+# Sample annotation at right side, with color bar.
+sample.anno_df = data.frame(group = c(rep('N_tumor', 24),rep('N_normal', 24),
+    rep('R_tumor', 24), rep('R_normal', 24)))
+sample.ha = rowAnnotation(df = sample.anno_df,
+    col = list(group = c('N_tumor' = 'darkorchid1', 'N_normal' = 'yellow',
+                         'R_tumor' = 'chocolate', 'R_normal' = 'chartreuse')),
+    gp = gpar(col = 'black'),  # for the color of grid border.
+    show_legend = TRUE)
 
+# show stack bar at right side of heatmap
 #bar.matrix = as.matrix(read.csv('test', header=TRUE, sep = '\t'))
 #sample.stackbar.ha = rowAnnotation(stacked_bar = row_anno_barplot(bar.matrix,
-#                                                                  border = FALSE,
-#                                                                  gp = gpar(fill = c('red', 'blue'))
-#                                                                 ),
-#                                   width = unit(1, 'cm')
-#                                   )
+#    border = FALSE, gp = gpar(fill = c('red', 'blue'))),
+#    width = unit(1, 'cm'))
 
 col = c('gain' = 'red', 'loss' = 'blue')
 
