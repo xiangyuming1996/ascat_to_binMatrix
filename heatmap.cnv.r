@@ -10,29 +10,22 @@ library('ComplexHeatmap')
 mat = read.csv2('all.renamed.ASCAT.segments.txt.gainloss.binMat.txt',
                 sep='\t', header=TRUE, row.names=1)
 
-chromosome.anno_df = data.frame(chromosome = t(read.csv2('chromosome.colorband.txt',
-                                               header = FALSE, sep = '\t')))
+# for black and white color band of chromosome at top of heatmap.
+chromosome.anno_df = data.frame(
+    chromosome = t(read.csv2('chromosome.colorband.txt',
+    header = FALSE, sep = '\t')))
 
-#chromosome.name.loci = c(120,359,573,762,943,1114,1275,1423,1562,1697,1828,1958,
-#                         2079,2187,2288,2380,2461,2537,2601,2658,2710,2755)
-
+# to indicate chr Number text.
 chromosome.name.loci = read.csv2('chromosome.nameprobe.txt', sep='\t', header= FALSE)
 chromosome.name.loci = as.numeric(chromosome.name.loci)
 
 chromosome.name.link = column_anno_link(at = chromosome.name.loci,
-                                 labels = c('1', '2', '3', '4', '5', '6', '7', '8', '9', '10','11','12', '13',
-                                            '14', '15', '16','17', '18','19','20','21','22'),
-                                 side = 'top',
-                                 labels_gp = gpar(fontsize=7),
-                                 link_width = unit(1, 'mm')
-                                 )
+    labels = as.character(1:22), side = 'top', labels_gp = gpar(fontsize=7),
+    link_width = unit(1, 'mm'))
 
 chromosome.ha = HeatmapAnnotation(df = chromosome.anno_df,
-                                  col = list(chromosome = c("odd"="black","even"="gray80")),
-                                  show_legend = FALSE,
-                                  gap = unit(2,'mm'),
-                                  link = chromosome.name.link
-)
+    col = list(chromosome = c("odd"="black","even"="gray80")),
+    show_legend = FALSE, gap = unit(2,'mm'), link = chromosome.name.link)
 
 #sample.anno_df = data.frame(group = c(rep('N_tumor', 24),rep('N_normal', 24),rep('R_tumor', 24), rep('R_normal', 24)))
 #sample.ha = rowAnnotation(df = sample.anno_df,
