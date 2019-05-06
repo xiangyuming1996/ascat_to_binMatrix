@@ -8,7 +8,9 @@ to align cnv segemnts to each genomic window, for heatmap.
 python ascat_to_binMatrix.py filename.ascat.txt
 `
 
-output will be files named with "filename.ascat.txt.gainloss.binMat.txt" and "filename.ascat.txt.relcn.binMat.txt".
+output matrix will be files named with "filename.ascat.txt.gainloss.binMat.txt" and "filename.ascat.txt.relcn.binMat.txt".
+
+also, file "chromosome.colorband.txt" and 'chromosome.nameprobe.txt'
 
 2. modify r script to draw heatmap, using ComplexHeatmap package.
 ## file format
