@@ -169,7 +169,7 @@ def sortdf(df):
     df.sort_values('lesion', axis=0, inplace=True, ascending=False)
     return df.reindex(columns = col)
 
-def sortsample(df, f):
+def ordersample(df, f):
     """
     sort sampl by order in file
     """
@@ -191,7 +191,7 @@ def machine(filename):
     outfilename = filename + '.relcn.binMat.txt'
 
 #    df = sortdf(df)
-    df = sortsample(df, 'samplelist.txt')
+    df = ordersample(df, 'samplelist.txt')
     df.to_csv(outfilename, sep='\t', header=True, index=True)
     print('\n')
     print(df)
