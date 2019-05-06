@@ -3,6 +3,7 @@ to align cnv segemnts to each genomic window, for heatmap.
 
 ## getting start
 1. get heatmap matrix:
+
 `
 python ascat_to_binMatrix.py filename.ascat.txt
 `
